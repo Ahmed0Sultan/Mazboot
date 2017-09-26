@@ -1,6 +1,6 @@
 # coding=utf8
-import datetime,json,math
-import sys, traceback,os
+import datetime, json, math
+import sys, traceback, os
 from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import false
 import FacebookAPI as FB
@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from flask import Flask, request,render_template,redirect,flash,url_for
+from flask import Flask, request, render_template, redirect, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -24,14 +24,15 @@ UPLOAD_FOLDER = base_path + image_folder
 # UPLOAD_FOLDER = image_folder
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bot.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = false
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = false
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'super-secret'
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
 
 token = get_page_access_token()
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -46,8 +47,8 @@ def verify():
         if not request.args.get("hub.verify_token") == get_verify_token():
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
-
-    return "Hello world", 200
+    return render_template('index.html')
+    return "Welcome In Mazboot world", 200
 
 
 @app.route('/', methods=['POST'])
@@ -74,17 +75,18 @@ def handle_messages():
             traceback.print_exc()
     return "ok"
 
+
 def processIncoming(user_id, message):
     if message['type'] == 'text':
         message_text = message['data']
-        message_text = message_text.decode('utf-8','ignore')
+        message_text = message_text.decode('utf-8', 'ignore')
         print message_text
 
         return message_text
 
     elif message['type'] == 'postback':
         message_payload = message['payload']
-        payload_response = payloadProcessing(user_id,message_payload)
+        payload_response = payloadProcessing(user_id, message_payload)
         return payload_response
 
     elif message['type'] == 'quick_reply':
@@ -93,12 +95,12 @@ def processIncoming(user_id, message):
         return quick_reply_response
 
     elif message['type'] == 'location':
-        response = "I've received location (%s,%s) (y)"%(message['data'][0],message['data'][1])
+        response = "I've received location (%s,%s) (y)" % (message['data'][0], message['data'][1])
         return response
 
     elif message['type'] == 'audio':
         audio_url = message['data']
-        return "I've received audio %s"%(audio_url)
+        return "I've received audio %s" % (audio_url)
 
     # Unrecognizable incoming, remove context and reset all data to start afresh
     else:
@@ -115,7 +117,8 @@ def messaging_events(payload):
         # Postback Message
         if "postback" in event:
             print event
-            yield sender_id, {'type': 'postback', 'payload': event['postback']['payload'], 'message_id': event["sender"]["id"]}
+            yield sender_id, {'type': 'postback', 'payload': event['postback']['payload'],
+                              'message_id': event["sender"]["id"]}
 
 
         # Pure text message
@@ -154,15 +157,15 @@ def messaging_events(payload):
         else:
             yield sender_id, {'type': 'text', 'data': "I don't understand this", 'message_id': event['message']['mid']}
 
-def payloadProcessing(user_id,message_payload):
+
+def payloadProcessing(user_id, message_payload):
     if message_payload == 'Get_Started_Button':
-       pass
+        pass
     return 'postback'
 
-def quickReplyProcessing(user_id,quick_reply_payload):
 
+def quickReplyProcessing(user_id, quick_reply_payload):
     return 'postback'
-
 
 
 def log(message):  # simple wrapper for logging to stdout on heroku
