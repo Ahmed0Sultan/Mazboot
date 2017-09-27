@@ -3,6 +3,7 @@ import requests, json
 from flask import url_for
 
 
+
 def get_user_fb(token, user_id):
     r = requests.get("https://graph.facebook.com/v2.6/" + user_id,
                      params={"fields": "first_name,last_name,profile_pic,locale,timezone,gender"
@@ -106,23 +107,46 @@ def set_menu(token):
     r = requests.post("https://graph.facebook.com/v2.6/me/messenger_profile",
                       params={"access_token": token},
                       data=json.dumps({
-                          "setting_type": "call_to_actions",
-                          "thread_state": "existing_thread",
-                          "call_to_actions": [
+                          "persistent_menu": [
                               {
-                                  "type": "postback",
-                                  "title": "الئمة",
-                                  "payload": "Akla_Menu"
-                              },
+
+                                  "locale": "default",
+                                  "composer_input_disabled": False,
+                                  "call_to_actions": [
+                                      {
+                                          "type": "postback",
+                                          "title": "اسالنى",
+                                          "payload": "QUESTION"
+                                      },
+                                      {
+                                          "type": "postback",
+                                          "title": "ابلاغ قياس السكر",
+                                          "payload": "SUGER"
+                                      },
+                                      {
+                                          "type": "postback",
+                                          "title": "ابلاغ الوجبات اليوميه",
+                                          "payload": "MEAL"
+                                      }
+                                  ]
+                              }
+                          ]
+
+                      }),
+                      headers={'Content-type': 'application/json'})
+    print r.content
+    if r.status_code != requests.codes.ok:
+        print r.text
+
+
+def set_greeting_text(token):
+    r = requests.post("https://graph.facebook.com/v2.6/me/messenger_profile",
+                      params={"access_token": token},
+                      data=json.dumps({
+                          "greeting": [
                               {
-                                  "type": "postback",
-                                  "title": "الطلبات",
-                                  "payload": "Akla_Orders"
-                              },
-                              {
-                                  "type": "postback",
-                                  "title": "حسابي",
-                                  "payload": "Akla_Account"
+                                  "locale": "default",
+                                  "text": "مرحبا بك فى مساعدك الطبى"
                               }
                           ]
                       }),
@@ -151,3 +175,7 @@ def set_get_started_button(token):
 
         # set_menu()
         # set_get_started_button()
+
+
+# set_menu(token)
+# set_greeting_text(token)

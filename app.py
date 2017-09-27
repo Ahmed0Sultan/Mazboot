@@ -5,7 +5,7 @@ from sqlalchemy.orm import relation
 from sqlalchemy.sql.expression import false
 import FacebookAPI as FB
 from config import *
-from flask_login import LoginManager
+from flask_login import LoginManager, login_manager
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -17,6 +17,7 @@ from flask import Flask, request, render_template, redirect, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+token = get_page_access_token()
 
 base_path = os.path.dirname(__file__)
 image_folder = '/static/assets/img/parts/'
@@ -31,8 +32,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'super-secret'
 # db = SQLAlchemy(app)
 
-token = get_page_access_token()
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -48,7 +51,7 @@ def verify():
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
     return render_template('index.html')
-    return "Welcome In Mazboot world", 200
+    # return "Welcome In Mazboot world", 200
 
 
 @app.route('/', methods=['POST'])
@@ -160,12 +163,50 @@ def messaging_events(payload):
 
 def payloadProcessing(user_id, message_payload):
     if message_payload == 'Get_Started_Button':
-        pass
+        FBuser = FB.get_user_fb(token, user_id)
+        msg = u" مرحبا بك يا "
+        FB.send_message(token, user_id, FBuser.get('first_name') + msg)
+        FB.show_typing(token, user_id, 'typing_on')
+        intro = u"هل لديك حساب على تطبيق مظبوط "
+        FB.send_message(token, user_id, intro)
+
     return 'postback'
 
 
 def quickReplyProcessing(user_id, quick_reply_payload):
     return 'postback'
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('new_question'))
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    email = request.form['email']
+    password = request.form['password']
+    registered_user = Admin.query.filter_by(email=email).first()
+    if registered_user is None:
+        flash('Email is invalid', 'error')
+        return redirect(url_for('login'))
+    if not registered_user.check_password(password):
+        flash('Password is invalid', 'error')
+        return redirect(url_for('login'))
+    login_user(registered_user)
+    flash('Logged in successfully')
+    return redirect(url_for('new_question'))
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+
+@login_manager.user_loader
+def load_user(id):
+    return ''
 
 
 def log(message):  # simple wrapper for logging to stdout on heroku
