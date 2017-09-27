@@ -3,7 +3,6 @@ import requests, json
 from flask import url_for
 
 
-
 def get_user_fb(token, user_id):
     r = requests.get("https://graph.facebook.com/v2.6/" + user_id,
                      params={"fields": "first_name,last_name,profile_pic,locale,timezone,gender"
@@ -176,6 +175,74 @@ def set_get_started_button(token):
         # set_menu()
         # set_get_started_button()
 
+
+def send_account_status_quick_replies(token, user_id):
+    key = 'ACCOUNT_STATUS_'
+
+    quickRepliesOptions = [
+        {"content_type": "text",
+         "title": u"نعم",
+         "payload": key + '1'
+         },
+        {"content_type": "text",
+         "title": u"لا",
+         "payload": key + '0'
+         }
+    ]
+
+    data = json.dumps({
+        "recipient": {"id": user_id},
+        "message": {
+            "text": "هل لديك حساب على تطبيق مظبوط",
+            "quick_replies": quickRepliesOptions
+        }
+    })
+    data = data.encode('utf-8')
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": token},
+                      data=data,
+                      headers={'Content-type': 'application/json'})
+
+    if r.status_code != requests.codes.ok:
+        print r.text
+
+
+def send_meal_quick_replies(token, user_id):
+    key = '_MEAL'
+
+    quickRepliesOptions = [
+        {
+            "content_type": "text",
+            "title": u"العشاء",
+            "payload": 'DINNER' + key
+        },
+        {
+            "content_type": "text",
+            "title": u"الغداء",
+            "payload": 'LUNCH' + key
+        },
+        {
+            "content_type": "text",
+            "title": u"الافطار",
+            "payload": 'BREAKFAST' + key
+        }
+    ]
+
+    data = json.dumps({
+        "recipient": {"id": user_id},
+        "message": {
+            "text": "من فضلك اختر الوجبة",
+            "quick_replies": quickRepliesOptions
+        }
+    })
+    data = data.encode('utf-8')
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": token},
+                      data=data,
+                      headers={'Content-type': 'application/json'})
+
+    if r.status_code != requests.codes.ok:
+        print r.text
 
 # set_menu(token)
 # set_greeting_text(token)

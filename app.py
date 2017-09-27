@@ -37,6 +37,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -167,8 +168,23 @@ def payloadProcessing(user_id, message_payload):
         msg = u" مرحبا بك يا "
         FB.send_message(token, user_id, FBuser.get('first_name') + msg)
         FB.show_typing(token, user_id, 'typing_on')
-        intro = u"هل لديك حساب على تطبيق مظبوط "
+        intro = u"تعرف على ما يقدمه مظبوط من القائمه"
         FB.send_message(token, user_id, intro)
+
+
+    elif message_payload == "QUESTION":
+        FB.show_typing(token, user_id, 'typing_on')
+        intro = u"يسعدنى الاجابه على اسئلتك :D تفضل بالسؤال"
+        FB.send_message(token, user_id, intro)
+
+    elif message_payload == "SUGER":
+        FB.show_typing(token, user_id, 'typing_on')
+        intro = u"من فضلك ادخل قياس السكر"
+        FB.send_message(token, user_id, intro)
+
+    elif message_payload == "MEAL":
+        FB.show_typing(token, user_id, 'typing_on')
+        FB.send_meal_quick_replies(token, user_id)
 
     return 'postback'
 
