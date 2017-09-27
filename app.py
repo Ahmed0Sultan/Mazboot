@@ -1,20 +1,19 @@
 # coding=utf8
-import datetime, json, math
-import sys, traceback, os
-from sqlalchemy.orm import relation
-from sqlalchemy.sql.expression import false
+import json
+import sys
+import traceback
+
+from firebase import firebase
+from flask_login import LoginManager
+from flask_login import login_user, logout_user, current_user
+
 import FacebookAPI as FB
 from config import *
-from flask_login import LoginManager, login_manager
-from flask_login import login_user, logout_user, current_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 from flask import Flask, request, render_template, redirect, flash, url_for
-from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 token = get_page_access_token()
@@ -25,13 +24,11 @@ UPLOAD_FOLDER = base_path + image_folder
 # UPLOAD_FOLDER = image_folder
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bot.db'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = false
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'super-secret'
-# db = SQLAlchemy(app)
-
+firebase = firebase.FirebaseApplication(get_firebase_url(), None)
+result = firebase.get('/users', None)
+# print result
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -200,16 +197,6 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
 
-    email = request.form['email']
-    password = request.form['password']
-    registered_user = Admin.query.filter_by(email=email).first()
-    if registered_user is None:
-        flash('Email is invalid', 'error')
-        return redirect(url_for('login'))
-    if not registered_user.check_password(password):
-        flash('Password is invalid', 'error')
-        return redirect(url_for('login'))
-    login_user(registered_user)
     flash('Logged in successfully')
     return redirect(url_for('new_question'))
 
