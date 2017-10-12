@@ -3,9 +3,8 @@ import json
 import sys
 import traceback
 
-from firebase import firebase
 from flask_login import LoginManager
-from flask_login import login_user, logout_user, current_user
+from flask_login import logout_user, current_user
 
 import FacebookAPI as FB
 from config import *
@@ -18,17 +17,9 @@ from flask import Flask, request, render_template, redirect, flash, url_for
 app = Flask(__name__)
 token = get_page_access_token()
 
-base_path = os.path.dirname(__file__)
-image_folder = '/static/assets/img/parts/'
-UPLOAD_FOLDER = base_path + image_folder
-# UPLOAD_FOLDER = image_folder
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'super-secret'
-firebase = firebase.FirebaseApplication(get_firebase_url(), None)
-result = firebase.get('/users', None)
-# print result
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)

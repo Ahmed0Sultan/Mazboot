@@ -7,3 +7,4 @@ gen
 .idea/
 config.py
 *.pyc
+firebase_secret.json
