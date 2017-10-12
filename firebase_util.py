@@ -2,6 +2,7 @@ import os
 
 import firebase_admin
 from firebase_admin import credentials
+from firebase_admin.auth import get_user
 from firebase_admin.db import reference
 
 from config import get_firebase_url
@@ -9,12 +10,43 @@ from config import get_firebase_url
 cred = credentials.Certificate(os.path.dirname(__file__) + '/firebase_secret.json')
 default_app = firebase_admin.initialize_app(cred, {'databaseURL': get_firebase_url()})
 
-dbRef = reference(path='/users', app=default_app)
 
-first1userbymail = dbRef.order_by_child('email').equal_to('madkourt48@gmail.com').limit_to_first(1).get()
-first10users = dbRef.order_by_child('email').limit_to_first(10).get()
-users = dbRef.child('01bM8zwz7WgxoI2JUcf1Tk9Ypl73')
+def add_new_record(node, value):
+    return reference(node).push(value)
 
-print first1userbymail
-print first10users
-print users.get().get('age')
+
+# new_record_reference = add_new_record('test', {'name': 'mohamed'})
+# print new_record_reference.key
+
+def get_record(node, key):
+    return reference(node).child(key).get()
+
+
+# print get_record('test', '-KwESxac5YUeZQ53Yu19')
+
+def update_record(node, key, value):
+    return reference(node).child(key).update(value)
+
+
+# print update_record('test', '-KwEoSnmM9pY35WnBRbP', {'key': [1, 2, 3]})
+
+
+def delete_node(node):
+    return reference(node).delete()  # return None
+
+
+# print delete_node(reference('test').child('-KwEoSnmM9pY35WnBRbP').child('name').path)
+# print delete_node('test')
+
+
+def delete_record(node, key):
+    return reference(node).child(key).delete()  # return None
+
+
+# print delete_record('test', '-KwESxac5YUeZQ53Yu19cc')
+
+# this function uses firebase auth not users node
+def get_user_details(uid):
+    return get_user(uid, default_app)
+
+# print get_user_details('pHWdFQSjJ0PXtbtBvbpvown2UmF3').email
