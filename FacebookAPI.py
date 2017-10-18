@@ -390,4 +390,4 @@ def send_sugar_times_quick_replies(token, user_id):
 
 # set_menu(token)
 # set_greeting_text(token)
-send_meal_times_quick_replies(get_page_access_token(), '1558695490860776')
+# send_meal_times_quick_replies(get_page_access_token(), '1558695490860776')
