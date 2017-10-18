@@ -2,6 +2,8 @@
 import requests, json
 from flask import url_for
 
+from config import get_page_access_token
+
 
 def get_user_fb(token, user_id):
     r = requests.get("https://graph.facebook.com/v2.6/" + user_id,
@@ -102,6 +104,11 @@ def send_url(token, user_id, text, title, url):
         print r.text
 
 
+MENUE_QUESTION = 'QUESTION'
+MENUE_SUGAR = 'SUGAR'
+MENUE_MEAL = 'MEAL'
+
+
 def set_menu(token):
     r = requests.post("https://graph.facebook.com/v2.6/me/messenger_profile",
                       params={"access_token": token},
@@ -115,17 +122,17 @@ def set_menu(token):
                                       {
                                           "type": "postback",
                                           "title": "اسالنى",
-                                          "payload": "QUESTION"
+                                          "payload": MENUE_QUESTION
                                       },
                                       {
                                           "type": "postback",
                                           "title": "ابلاغ قياس السكر",
-                                          "payload": "SUGER"
+                                          "payload": MENUE_SUGAR
                                       },
                                       {
                                           "type": "postback",
                                           "title": "ابلاغ الوجبات اليوميه",
-                                          "payload": "MEAL"
+                                          "payload": MENUE_MEAL
                                       }
                                   ]
                               }
@@ -176,17 +183,18 @@ def set_get_started_button(token):
         # set_get_started_button()
 
 
-def send_account_status_quick_replies(token, user_id):
-    key = 'ACCOUNT_STATUS_'
+ACCOUNT_STATUS_KEY = 'ACCOUNT_STATUS_'
 
+
+def send_account_status_quick_replies(token, user_id):
     quickRepliesOptions = [
         {"content_type": "text",
          "title": u"نعم",
-         "payload": key + '1'
+         "payload": ACCOUNT_STATUS_KEY + '1'
          },
         {"content_type": "text",
          "title": u"لا",
-         "payload": key + '0'
+         "payload": ACCOUNT_STATUS_KEY + '0'
          }
     ]
 
@@ -244,5 +252,142 @@ def send_meal_quick_replies(token, user_id):
     if r.status_code != requests.codes.ok:
         print r.text
 
+
+MEAL_TIMES_KEY = '_TIMES_MEAL'
+MEAL_FIREBASE_KEY = 'meal_times'
+MEAL_TIMES_NONE = '0'
+MEAL_TIMES_ONCE_DAY = '1'
+MEAL_TIMES_TWO_DAY = '2'
+MEAL_TIMES_THREE_DAY = '3'
+
+
+def send_meal_times_quick_replies(token, user_id):
+    quickRepliesOptions = [
+        {
+            "content_type": "text",
+            "title": u"لا تسال ",
+            "payload": MEAL_TIMES_NONE + MEAL_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u"مرة واحدة ",
+            "payload": MEAL_TIMES_ONCE_DAY + MEAL_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u"مرتين",
+            "payload": MEAL_TIMES_TWO_DAY + MEAL_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u"ثلاث مرات",
+            "payload": MEAL_TIMES_THREE_DAY + MEAL_TIMES_KEY
+        }
+    ]
+
+    data = json.dumps({
+        "recipient": {"id": user_id},
+        "message": {
+            "text": "من فضلك اختر عدد مرات السوال اليوميه عن الطعام :)",
+            "quick_replies": quickRepliesOptions
+        }
+    })
+    data = data.encode('utf-8')
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": token},
+                      data=data,
+                      headers={'Content-type': 'application/json'})
+
+    if r.status_code != requests.codes.ok:
+        print r.text
+
+
+SUGAR_TIMES_KEY = '_TIMES_SUGAR'
+SUGAR_FIREBASE_KEY = 'sugar_times'
+SUGAR_TIMES_NONE = '0'
+SUGAR_TIMES_ONCE_DAY = '1'
+SUGAR_TIMES_TWO_DAY = '2'
+SUGAR_TIMES_THREE_DAY = '3'
+SUGAR_TIMES_ONCE_WEEK = '4'
+SUGAR_TIMES_TWO_WEEK = '5'
+SUGAR_TIMES_THREE_WEEK = '6'
+SUGAR_TIMES_ONCE_MONTH = '7'
+SUGAR_TIMES_TWO_MONTH = '8'
+SUGAR_TIMES_THREE_MONTH = '9'
+
+
+def send_sugar_times_quick_replies(token, user_id):
+    quickRepliesOptions = [
+        {
+            "content_type": "text",
+            "title": u"لا تسال ",
+            "payload": SUGAR_TIMES_NONE + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u" مرة واحدة باليوم ",
+            "payload": SUGAR_TIMES_ONCE_DAY + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u"مرتين باليوم",
+            "payload": SUGAR_TIMES_TWO_DAY + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u" ثلاث مرات باليوم",
+            "payload": SUGAR_TIMES_THREE_DAY + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u" مرة واحدة بالاسبوع ",
+            "payload": SUGAR_TIMES_ONCE_WEEK + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u"مرتين بالاسبوع",
+            "payload": SUGAR_TIMES_TWO_WEEK + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u" ثلاث مرات بالاسبوع",
+            "payload": SUGAR_TIMES_THREE_WEEK + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u" مرة واحدة بالشهر ",
+            "payload": SUGAR_TIMES_ONCE_MONTH + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u"مرتين بالشهر",
+            "payload": SUGAR_TIMES_TWO_MONTH + SUGAR_TIMES_KEY
+        },
+        {
+            "content_type": "text",
+            "title": u" ثلاث مرات بالشهر",
+            "payload": SUGAR_TIMES_THREE_MONTH + SUGAR_TIMES_KEY
+        }
+
+    ]
+
+    data = json.dumps({
+        "recipient": {"id": user_id},
+        "message": {
+            "text": "من فضلك اختر عدد مرات السوال عن قياس السكر :)",
+            "quick_replies": quickRepliesOptions
+        }
+    })
+    data = data.encode('utf-8')
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                      params={"access_token": token},
+                      data=data,
+                      headers={'Content-type': 'application/json'})
+
+    if r.status_code != requests.codes.ok:
+        print r.text
+
+
 # set_menu(token)
 # set_greeting_text(token)
+send_meal_times_quick_replies(get_page_access_token(), '1558695490860776')

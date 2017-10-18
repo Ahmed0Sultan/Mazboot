@@ -3,11 +3,15 @@ import json
 import sys
 import traceback
 
+from firebase_admin.db import Reference, reference
 from flask_login import LoginManager
 from flask_login import logout_user, current_user
 
 import FacebookAPI as FB
+from FacebookAPI import MENUE_QUESTION, MENUE_SUGAR, MENUE_MEAL, SUGAR_TIMES_KEY, SUGAR_FIREBASE_KEY, MEAL_TIMES_KEY, \
+    MEAL_FIREBASE_KEY
 from config import *
+from firebase_util import add_new_record, update_record
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -19,7 +23,6 @@ token = get_page_access_token()
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'super-secret'
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -160,17 +163,17 @@ def payloadProcessing(user_id, message_payload):
         FB.send_message(token, user_id, intro)
 
 
-    elif message_payload == "QUESTION":
+    elif message_payload == MENUE_QUESTION:
         FB.show_typing(token, user_id, 'typing_on')
         intro = u"يسعدنى الاجابه على اسئلتك :D تفضل بالسؤال"
         FB.send_message(token, user_id, intro)
 
-    elif message_payload == "SUGER":
+    elif message_payload == MENUE_SUGAR:
         FB.show_typing(token, user_id, 'typing_on')
         intro = u"من فضلك ادخل قياس السكر"
         FB.send_message(token, user_id, intro)
 
-    elif message_payload == "MEAL":
+    elif message_payload == MENUE_MEAL:
         FB.show_typing(token, user_id, 'typing_on')
         FB.send_meal_quick_replies(token, user_id)
 
@@ -178,6 +181,22 @@ def payloadProcessing(user_id, message_payload):
 
 
 def quickReplyProcessing(user_id, quick_reply_payload):
+    if SUGAR_TIMES_KEY in quick_reply_payload:
+        FB.show_typing(token, user_id, 'typing_on')
+        FB.send_message(token, user_id, 'Thanks :)')
+        payload_id = quick_reply_payload.replace(SUGAR_TIMES_KEY, '')
+        # add_new_record('bot_users', {user_id: {'sugar_times': payload_id}})
+        update_record('bot_users', user_id,
+                      {SUGAR_FIREBASE_KEY: payload_id})  # use of update to be able to insert custom ids
+
+    elif MEAL_TIMES_KEY in quick_reply_payload:
+        FB.show_typing(token, user_id, 'typing_on')
+        FB.send_message(token, user_id, 'Thanks :)')
+        payload_id = quick_reply_payload.replace(MEAL_TIMES_KEY, '')
+        # add_new_record('bot_users', {user_id: {'sugar_times': payload_id}})
+        update_record('bot_users', user_id,
+                      {MEAL_FIREBASE_KEY: payload_id})  # use of update to be able to insert custom ids
+
     return 'postback'
 
 

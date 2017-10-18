@@ -49,4 +49,8 @@ def delete_record(node, key):
 def get_user_details(uid):
     return get_user(uid, default_app)
 
+
+def set_record_value(node, value):
+    return reference(node).set(value)
+
 # print get_user_details('pHWdFQSjJ0PXtbtBvbpvown2UmF3').email

@@ -7,4 +7,6 @@ gen
 .idea/
 config.py
 *.pyc
+*.PYC
 firebase_secret.json
+__pycache__/
