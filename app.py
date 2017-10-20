@@ -80,7 +80,13 @@ def processIncoming(user_id, message):
         uid = get_record(reference('bot_users').child(user_id).path, 'uid')
 
         if (last_msg == SUGAR_MSG_KEY):
-            return 'sugarrrrrr'
+            add_new_record(reference('glucose').child(uid).path, {
+                'value': message_text,
+                'timeInMillisecond': int(round(time.time() * 1000))
+            })
+            set_record_value(reference('bot_users').child(user_id).child('last_msg').path, '')
+
+            return 'نتمنى لك دوام الصحه والعافية'
         elif (last_msg == MEAL_MSG_KEY):
             add_new_record(reference('meals').child(uid).path, {
                 'meal': message_text,
