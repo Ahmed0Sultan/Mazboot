@@ -5,12 +5,10 @@ import schedule
 from firebase_admin.db import reference
 
 from FacebookAPI import *
-from config import get_page_access_token
+from config import *
 from firebase_util import default_app, update_record
 
 ###### MEALS ######
-
-MEAL_MSG_KEY = 'meal'
 
 
 def one_time_day_meal_job():
@@ -45,7 +43,7 @@ schedule.every().day.at("22:00").do(three_times_day_meal_job, ' فى العشا�
 
 ###### SUGAR #######
 
-SUGAR_MSG_KEY = 'sugar'
+
 
 
 def sugar_job(value):

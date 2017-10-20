@@ -1,8 +1,9 @@
 # encoding=utf8
-import requests, json
-from flask import url_for
+import json
 
-from config import get_page_access_token
+import requests
+
+from config import *
 
 
 def get_user_fb(token, user_id):
@@ -104,11 +105,6 @@ def send_url(token, user_id, text, title, url):
         print r.text
 
 
-MENUE_QUESTION = 'QUESTION'
-MENUE_SUGAR = 'SUGAR'
-MENUE_MEAL = 'MEAL'
-
-
 def set_menu(token):
     r = requests.post("https://graph.facebook.com/v2.6/me/messenger_profile",
                       params={"access_token": token},
@@ -183,9 +179,6 @@ def set_get_started_button(token):
         # set_get_started_button()
 
 
-ACCOUNT_STATUS_KEY = 'ACCOUNT_STATUS_'
-
-
 def send_account_status_quick_replies(token, user_id):
     quickRepliesOptions = [
         {"content_type": "text",
@@ -253,14 +246,6 @@ def send_meal_quick_replies(token, user_id):
         print r.text
 
 
-MEAL_TIMES_KEY = '_TIMES_MEAL'
-MEAL_FIREBASE_KEY = 'meal_times'
-MEAL_TIMES_NONE = '0'
-MEAL_TIMES_ONCE_DAY = '1'
-MEAL_TIMES_TWO_DAY = '2'
-MEAL_TIMES_THREE_DAY = '3'
-
-
 def send_meal_times_quick_replies(token, user_id):
     quickRepliesOptions = [
         {
@@ -300,20 +285,6 @@ def send_meal_times_quick_replies(token, user_id):
 
     if r.status_code != requests.codes.ok:
         print r.text
-
-
-SUGAR_TIMES_KEY = '_TIMES_SUGAR'
-SUGAR_FIREBASE_KEY = 'sugar_times'
-SUGAR_TIMES_NONE = '0'
-SUGAR_TIMES_ONCE_DAY = '1'
-SUGAR_TIMES_TWO_DAY = '2'
-SUGAR_TIMES_THREE_DAY = '3'
-SUGAR_TIMES_ONCE_WEEK = '4'
-SUGAR_TIMES_TWO_WEEK = '5'
-SUGAR_TIMES_THREE_WEEK = '6'
-SUGAR_TIMES_ONCE_MONTH = '7'
-SUGAR_TIMES_TWO_MONTH = '8'
-SUGAR_TIMES_THREE_MONTH = '9'
 
 
 def send_sugar_times_quick_replies(token, user_id):
@@ -386,7 +357,6 @@ def send_sugar_times_quick_replies(token, user_id):
 
     if r.status_code != requests.codes.ok:
         print r.text
-
 
 # set_menu(token)
 # set_greeting_text(token)

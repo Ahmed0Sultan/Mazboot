@@ -2,16 +2,16 @@
 import json
 import sys
 import traceback
+from time import time
 
-from firebase_admin.db import Reference, reference
+import time
+from firebase_admin.db import reference
 from flask_login import LoginManager
 from flask_login import logout_user, current_user
 
 import FacebookAPI as FB
-from FacebookAPI import MENUE_QUESTION, MENUE_SUGAR, MENUE_MEAL, SUGAR_TIMES_KEY, SUGAR_FIREBASE_KEY, MEAL_TIMES_KEY, \
-    MEAL_FIREBASE_KEY
 from config import *
-from firebase_util import add_new_record, update_record
+from firebase_util import update_record, get_record, add_new_record, set_record_value
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -72,10 +72,23 @@ def handle_messages():
 
 
 def processIncoming(user_id, message):
+    message_text = message['data']
+    message_text = message_text.decode('utf-8', 'ignore')
+
     if message['type'] == 'text':
-        message_text = message['data']
-        message_text = message_text.decode('utf-8', 'ignore')
-        print message_text
+        last_msg = get_record(reference('bot_users').child(user_id).path, 'last_msg')
+        uid = get_record(reference('bot_users').child(user_id).path, 'uid')
+
+        if (last_msg == SUGAR_MSG_KEY):
+            return 'sugarrrrrr'
+        elif (last_msg == MEAL_MSG_KEY):
+            add_new_record(reference('meals').child(uid).path, {
+                'meal': message_text,
+                'timeInMillisecond': int(round(time.time() * 1000))
+            })
+            set_record_value(reference('bot_users').child(user_id).child('last_msg').path, '')
+
+            return 'بالهناء والشفاء'
 
         return message_text
 
@@ -122,7 +135,7 @@ def messaging_events(payload):
             yield sender_id, {'type': 'text', 'data': data, 'message_id': event['message']['mid']}
 
         # Message with attachment (location, audio, photo, file, etc)
-        elif "attachments" in event["message"]:
+        elif "message" in event and "attachments" in event["message"]:
 
             # Location
             if "location" == event['message']['attachments'][0]["type"]:
@@ -145,7 +158,7 @@ def messaging_events(payload):
                                   'message_id': event['message']['mid']}
 
         # Quick reply message type
-        elif "quick_reply" in event["message"]:
+        elif "message" in event and "quick_reply" in event["message"]:
             data = event["message"]["quick_reply"]["payload"]
             yield sender_id, {'type': 'quick_reply', 'data': data, 'message_id': event['message']['mid']}
 
